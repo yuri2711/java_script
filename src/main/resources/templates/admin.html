@@ -61,6 +61,69 @@
         </nav>
     </div>
 </div>
+
+<div class="modal"
+     tabindex="-1"
+     id="edit"
+     role="dialog"
+     aria-labelledby="editTitle"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTitle">Редактирование пользователя</h5>
+                <button type="button"
+                        сlass="btn-close"
+                        data-dismiss="modal"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="font-weight-bold"
+                           for="idEditModal">Идентификатор</label>
+                    <input id="idEditModal" class="form-control"
+                           readonly>
+                </div>
+                <div class="form-group text-center">
+                    <label class="font-weight-bold"
+                           for="NameEditModal">Имя</label>
+                    <input id="NameEditModal" class="form-control">
+                </div>
+                <div class="form-group text-center">
+                    <label class="font-weight-bold"
+                           for="lastNameEditModal">Фамилия</label>
+                    <input id="lastNameEditModal" class="form-control">
+                </div>
+                <div class="form-group text-center">
+                    <label class="font-weight-bold"
+                           for="passwordEditModal">Пароль</label>
+                    <input type="password" id="passwordEditModal"
+                           class="form-control">
+                </div>
+                <div class="form-group text-center">
+                    <label class="font-weight-bold"
+                           for="ageEditModal">Возраст</label>
+                    <input type="text" id="ageEditModal"
+                           class="form-control">
+                </div>
+                <div class="form-group text-center">
+                    <label class="font-weight-bold"
+                           for="rolesEditModal">Роли</label>
+                    <select multiple class="form-control"
+                            id="rolesEditModal">
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" id="editButtonUser">Редактировать</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script defer>
     let allRoles = [];
     let allUsers = [];
@@ -68,7 +131,7 @@
     fetch('/admins/list').then(listUser => {
             listUser.json().then(user => {
                     allUsers = user;
-                console.log(allUsers);
+                    console.log(allUsers);
                     createTable();
                 }
             )
@@ -87,7 +150,6 @@
     )
 
 
-
     function createTable() {
         let temp = "";
         allUsers.forEach(user => {
@@ -102,14 +164,16 @@
                 stringRole += r.role + " ";
             })
             temp += stringRole + "</td>"
-            temp += "<td><button class='btn btn-info' onclick='editUserBTN(this)' id='editBTN'" + user.id + '>Редактирование</button></td>';
-            temp += "<td><button class='btn btn-info' onclick='deleteUserBTN(this)' id='deleteBTN'" + user.id + '>Удаление</button></td></tr>';
+            temp += "<td><button class='btn btn-info' onclick='editUserBTN(this)' id='editBtn" + user.id + "'>Редактирование</button></td>";
+            temp += "<td><button class='btn btn-info' onclick='deleteUserBTN(this)' id='deleteBTN" + user.id + "'>Удаление</button></td></tr>";
         })
         document.getElementById("tableUserBody").innerHTML = temp;
     }
 
     function editUserBTN(element) {
-
+        console.log(element);
+        console.log(element.id);
+        console.log(element.id.slice(7));
     }
 
     function deleteUserBTN(element) {
@@ -133,7 +197,6 @@
             if (op.selected) {
                 allRoles.forEach(r => {
                     if (r.role == op.text) {
-
                         newUser.roles.push(r);
                     }
                 })
@@ -144,9 +207,24 @@
             headers: {'Content-Type': 'application/json; charset=utf-8'},
             Accept: 'application/json, */*; q=0.01',
             body: JSON.stringify(newUser)
-        });
-        allUsers.push(newUser);
-        createTable();
+        }).then(resp => {
+            if (resp.ok){
+                fetch('/admins/one/' + newUser.name).then( otv =>{
+                    otv.json().then(otv1 => {
+                        allUsers.push(otv1);
+                        createTable();
+                        console.log(otv1);
+                        document.getElementById("nameNew").value = "";
+                        document.getElementById("lastNameNew").value = "";
+                        document.getElementById("passwordNew").value = "";
+                        document.getElementById("ageNew").value = "";
+                        document.getElementById("rolesNew").selectedIndex = -1;
+                    })
+
+                })
+            }
+        })
+
     })
 </script>
 </body>

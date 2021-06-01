@@ -23,7 +23,7 @@ public class AdminRestController {
     @PostMapping("/new")
     public ResponseEntity<?> create(@RequestBody People user) {
         service.save(user);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/list")
@@ -40,6 +40,12 @@ public class AdminRestController {
         return user != null
                 ? new ResponseEntity<>(user, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/one/{name}")
+    public ResponseEntity<People>get(@PathVariable String name){
+        People user = service.getOneUserByName(name);
+        return user !=null ? new ResponseEntity<>(user, HttpStatus.OK):new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/allRoles")

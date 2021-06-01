@@ -1,6 +1,7 @@
 package ru.yuri.model;
 
 
+import com.fasterxml.jackson.annotation.JsonSetter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -49,6 +50,16 @@ public class People  implements UserDetails {
     public Set<Role> getRoles() {
         if(roles == null)roles = new HashSet<>();
         return roles;
+    }
+
+    @JsonSetter("roles")
+    public void setRoles(Role[] roles){
+        Arrays.stream(roles).forEach(this::setRole);
+    }
+
+    private void setRole(Role role) {
+        if(roles == null)roles = new HashSet<>();
+        roles.add(role);
     }
 
     public void setRoles(Set roles) {

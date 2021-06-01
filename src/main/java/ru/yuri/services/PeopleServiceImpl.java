@@ -70,4 +70,9 @@ public class PeopleServiceImpl implements PeopleService {
         return peopleDAO.getSingleRole(rAdmin);
     }
 
+    @Override
+    public People getOneUserByName(String name) {
+        return (People) peopleDAO.getUserByName(name);
+    }
+
 }

@@ -1,8 +1,10 @@
 package ru.yuri.model;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 

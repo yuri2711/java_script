@@ -19,4 +19,6 @@ public interface PeopleService {
     void saveRole(Role admin);
 
     Role getSingleRole(String rAdmin);
+
+    People getOneUserByName(String name);
 }
