@@ -54,15 +54,14 @@ public class AdminRestController {
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    @RequestMapping(value = "/{id}", method = {RequestMethod.PUT, RequestMethod.POST})
-    public ResponseEntity<People> update(@PathVariable int id, @RequestBody People user) {
-         service.update(user);
-        return true
+    @PutMapping("/update")
+    public ResponseEntity<People> update(@RequestBody People user) {
+        boolean res = service.update(user);
+        return res
                 ? new ResponseEntity<>(HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
     }
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<People> delete(@PathVariable int id) {
         boolean bool = service.delete(id);
         return bool

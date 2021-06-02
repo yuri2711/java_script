@@ -41,8 +41,9 @@ public class PeopleServiceImpl implements PeopleService {
 
     @Override
     @Transactional
-    public void update(People people) {
+    public boolean update(People people) {
         peopleDAO.update(people);
+        return true;
     }
 
     @Override

@@ -62,12 +62,7 @@
     </div>
 </div>
 
-<div class="modal"
-     tabindex="-1"
-     id="edit"
-     role="dialog"
-     aria-labelledby="editTitle"
-     aria-hidden="true">
+<div class="modal" tabindex="-1" id="editModalUser" role="dialog" aria-labelledby="editTitle" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -88,8 +83,8 @@
                 </div>
                 <div class="form-group text-center">
                     <label class="font-weight-bold"
-                           for="NameEditModal">Имя</label>
-                    <input id="NameEditModal" class="form-control">
+                           for="nameEditModal">Имя</label>
+                    <input id="nameEditModal" class="form-control">
                 </div>
                 <div class="form-group text-center">
                     <label class="font-weight-bold"
@@ -123,6 +118,51 @@
         </div>
     </div>
 </div>
+<div class="modal" tabindex="-1" id="deleteModalUser" role="dialog" aria-labelledby="editTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteTitle">Удаление пользователя</h5>
+                <button type="button"
+                        сlass="btn-close"
+                        data-dismiss="modal"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="font-weight-bold"
+                           for="idDeleteModal">Идентификатор</label>
+                    <input id="idDeleteModal" class="form-control"
+                           readonly>
+                </div>
+                <div class="form-group text-center">
+                    <label class="font-weight-bold"
+                           for="nameDeleteModal">Имя</label>
+                    <input id="nameDeleteModal" class="form-control" readonly>
+                </div>
+                <div class="form-group text-center">
+                    <label class="font-weight-bold"
+                           for="lastNameDeleteModal">Фамилия</label>
+                    <input id="lastNameDeleteModal" class="form-control" readonly>
+                </div>
+
+                <div class="form-group text-center">
+                    <label class="font-weight-bold"
+                           for="ageDeleteModal">Возраст</label>
+                    <input type="text" id="ageDeleteModal"
+                           class="form-control" readonly>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" id="deleteButtonUser">Удалить</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script defer>
     let allRoles = [];
@@ -150,6 +190,71 @@
     )
 
 
+    $('#editButtonUser').click(function () {
+        let editUser = {
+            id: -1,
+            name: "",
+            lastname: "",
+            age: 0,
+            pass: "",
+            roles: []
+        };
+        editUser.id = document.getElementById("idEditModal").value;
+        editUser.name = document.getElementById("nameEditModal").value;
+        editUser.lastname = document.getElementById("lastNameEditModal").value;
+        editUser.age = document.getElementById("ageEditModal").value;
+        editUser.pass = document.getElementById("passwordEditModal").value;
+        [].slice.call(document.getElementById("rolesEditModal")).forEach(op => {
+            if (op.selected) {
+                allRoles.forEach(role => {
+                    if (role.role == op.text) {
+                        editUser.roles.push(role);
+                    }
+                })
+            }
+        })
+        fetch("/admins/update", {
+            method: 'PUT',
+            body: JSON.stringify(editUser),
+            headers: {'Content-Type': 'application/json'}
+        }).then(res => {
+            if (res.ok) {
+                allUsers.forEach(user => {
+                    if (user.id == editUser.id) {
+                        $('#editModalUser').modal('hide');
+                        user.name = editUser.name;
+                        user.lastname = editUser.lastname;
+                        user.age = editUser.age;
+                        user.pass = editUser.pass;
+                        user.roles = editUser.roles;
+                    }
+                })
+                createTable();
+            }
+        })
+    })
+
+    $('#deleteModalUser').click(function () {
+        let id = document.getElementById("idDeleteModal").value;
+        $('#deleteModalUser').modal('hide');
+
+        fetch('/admins/delete/' + id, {
+            method: 'DELETE'
+        }).then(res => {
+            if (res.ok){
+                document.getElementById(id).remove();
+                allUsers.forEach(users => {
+                    if (users.id == id){
+                        delete allUsers[allUsers.indexOf(users)];
+                        console.log(allUsers);
+                    }
+                })
+            }
+        })
+        createTable();
+    })
+
+
     function createTable() {
         let temp = "";
         allUsers.forEach(user => {
@@ -164,8 +269,8 @@
                 stringRole += r.role + " ";
             })
             temp += stringRole + "</td>"
-            temp += "<td><button class='btn btn-info' onclick='editUserBTN(this)' id='editBtn" + user.id + "'>Редактирование</button></td>";
-            temp += "<td><button class='btn btn-info' onclick='deleteUserBTN(this)' id='deleteBTN" + user.id + "'>Удаление</button></td></tr>";
+            temp += "<td><button class='btn btn-primary' onclick='editUserBTN(this)' id='editBtn" + user.id + "'>Редактирование</button></td>";
+            temp += "<td><button class='btn btn-danger' onclick='deleteUserBTN(this)' id='deleteBTN" + user.id + "'>Удаление</button></td></tr>";
         })
         document.getElementById("tableUserBody").innerHTML = temp;
     }
@@ -174,10 +279,41 @@
         console.log(element);
         console.log(element.id);
         console.log(element.id.slice(7));
+        allUsers.forEach(user => {
+            if (user.id == element.id.slice(7)) {
+                document.getElementById("idEditModal").value = user.id;
+                document.getElementById("nameEditModal").value = user.name;
+                document.getElementById("lastNameEditModal").value = user.lastname;
+                document.getElementById("ageEditModal").value = user.age;
+                document.getElementById("passwordEditModal").value = user.pass;
+                let temp = "";
+                allRoles.forEach(roleUserAll => {
+                    let bool = false;
+                    user.roles.forEach(role => {
+                        if (roleUserAll.id == role.id) {
+                            bool = true;
+                        }
+                    })
+                    if (bool) {
+                        temp += "<option selected"  + ">" + roleUserAll.role + "</option>";
+                    }else temp += "<option>" + roleUserAll.role + "</option>";
+                })
+                document.getElementById("rolesEditModal").innerHTML = temp;
+            }
+        });
+        $('#editModalUser').modal('show');
     }
 
     function deleteUserBTN(element) {
-
+        allUsers.forEach(user => {
+            if (user.id == element.id.slice(9)){
+                document.getElementById("idDeleteModal").value = user.id;
+                document.getElementById("nameDeleteModal").value = user.name;
+                document.getElementById("lastNameDeleteModal").value = user.lastname;
+                document.getElementById("ageDeleteModal").value = user.age;
+            }
+        });
+        $('#deleteModalUser').modal('show');
     }
 
     $('#addUserBtn').click(function () {
@@ -208,8 +344,8 @@
             Accept: 'application/json, */*; q=0.01',
             body: JSON.stringify(newUser)
         }).then(resp => {
-            if (resp.ok){
-                fetch('/admins/one/' + newUser.name).then( otv =>{
+            if (resp.ok) {
+                fetch('/admins/one/' + newUser.name).then(otv => {
                     otv.json().then(otv1 => {
                         allUsers.push(otv1);
                         createTable();
